@@ -7,7 +7,7 @@ class Setting:
         self.alpha = pi/3
         self.dx=self.cellWidth*cos(self.alpha)
         self.dy=self.cellWidth*sin(self.alpha)
-        self.color = ['#630900','#FA9363','#C3CCD7','#4DC726']
+        self.color = [(99,9,0),(250,147,99),(195,204,215),(77,199,38),(23,63,63),(0,2,61)]
         self.cubeColor = 'black'
         self.boardSize = 13
         self.screenWidth = int((self.boardSize+2)*self.cellWidth+(self.boardSize+1)*self.dx)

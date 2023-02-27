@@ -64,13 +64,13 @@ class Game:
                 if event.type == pg.QUIT:
                     looping = False
                 if event.type == pg.KEYDOWN:
-                    if event.key == pg.K_w:
+                    if event.key == pg.K_w or event.key== pg.K_UP:
                         looping = self.cube.move(mode,'w')
-                    elif event.key == pg.K_s:
+                    elif event.key == pg.K_s or event.key== pg.K_DOWN:
                         looping = self.cube.move(mode,'s')
-                    elif event.key == pg.K_d:
+                    elif event.key == pg.K_d or event.key== pg.K_RIGHT:
                         looping = self.cube.move(mode,'d')
-                    elif event.key == pg.K_a:
+                    elif event.key == pg.K_a or event.key== pg.K_LEFT:
                         looping = self.cube.move(mode,'a')
              
             self.screen.fill(self.setting.color[0])
@@ -95,15 +95,6 @@ class Game:
             
 
 def main():
-    testboard1 = {
-            (0, 0):2,(0, 1):2,(0, 2):2,
-            (1, 0):2,(1, 1):2,(1, 2):2,(1, 3):2,(1, 4):2,(1, 5):2,
-            (2, 0):2,(2, 1):2,(2, 2):2,(2, 3):2,(2, 4):2,(2, 5):2,(2, 6):2,(2, 7):2,(2, 8):2,
-            (3, 1):2,(3, 2):2,(3, 3):2,(3, 4):2,(3, 5):2,(3, 6):2,(3, 7):2,(3, 8):2,(3, 9):2,
-            (4, 5):2,(4, 6):2,(4, 7):3,(4, 8):2,(4, 9):2,
-            (5, 6):2,(5, 7):2,(5, 8):2
-            }
-    cubePos = [(1,1),(1,1)]
     setting=Setting()
     testCase = TestCase('Input.txt')
     pg.display.set_caption("Visualization")
@@ -112,5 +103,7 @@ def main():
     while testCase.isNotEmpty():
         game.loadTestCase(testCase.getTestCase())
         game.gameStart(mode)
+    # game.loadTestCase([testboard1,cubePos,buttonList])
+    # game.gameStart(mode)
 if __name__ == "__main__":
     main()
