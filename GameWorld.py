@@ -41,6 +41,10 @@ class Board:
                     ]
                 pg.draw.line(self.screen,pg.Color(self.color[5]),points[0],points[2])
                 pg.draw.line(self.screen,pg.Color(self.color[5]),points[1],points[3])
+            elif buttonValue[0]==3:
+                point = (self.basePoint[0]+buttonKey[0]*self.dx+buttonKey[1]*self.cellWidth + self.cellWidth/2 + self.dx/2,self.basePoint[1]+buttonKey[0]*self.dy+self.dy/2)
+                pg.draw.circle(self.screen,pg.Color(self.color[1]),point,self.dy/2)
+                pg.draw.circle(self.screen,pg.Color(self.color[2]),point,self.dy/4)
 class Cube:
     def __init__(self, game):
         self.firstCube = game.testCase[1][0]
@@ -217,6 +221,10 @@ class Cube:
                             self.board.map[j]%=4
                         else:
                             self.board.map[j]=2
+                elif ((self.secondCube in buttonListKeys and self.board.buttonList[self.secondCube][0]==3)):
+                    [self.firstCube,self.secondCube] = self.board.buttonList[self.secondCube][1]
+                elif (self.firstCube in buttonListKeys and self.board.buttonList[self.firstCube][0]==3):
+                    [self.firstCube,self.secondCube] = self.board.buttonList[self.firstCube][1]   
                 self.board.screen.fill(pg.Color(self.board.color[0]))
                 self.board.draw()
                 self.draw()
@@ -303,5 +311,9 @@ class Cube:
                         self.board.map[i]%=4
                     else:
                         self.board.map[i]=2
+            elif ((self.secondCube in buttonListKeys and self.board.buttonList[self.secondCube][0]==3)):
+                    [self.firstCube,self.secondCube] = self.board.buttonList[self.secondCube][1]
+            elif (self.firstCube in buttonListKeys and self.board.buttonList[self.firstCube][0]==3):
+                [self.firstCube,self.secondCube] = self.board.buttonList[self.firstCube][1]
         return 1
 

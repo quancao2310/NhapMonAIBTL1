@@ -96,14 +96,12 @@ class Game:
 
 def main():
     setting=Setting()
-    testCase = TestCase('Input.txt')
+    testCase = TestCase(setting.inputFileName)
     pg.display.set_caption("Visualization")
     game = Game(setting)
     mode = game.chooseMode()
     while testCase.isNotEmpty():
         game.loadTestCase(testCase.getTestCase())
         game.gameStart(mode)
-    # game.loadTestCase([testboard1,cubePos,buttonList])
-    # game.gameStart(mode)
 if __name__ == "__main__":
     main()
