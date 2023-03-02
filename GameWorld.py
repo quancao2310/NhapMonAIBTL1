@@ -55,6 +55,15 @@ class Cube:
         pg.draw.polygon(self.board.screen,pg.Color(self.color),points)
         for i in range (0,4):
             pg.draw.line(self.board.screen,pg.Color(self.board.color[0]),points[i],points[(i+1)%4])
+    def isNotSplit(self):
+        if self.firstCube == self.secondCube:
+            return True
+        if self.firstCube[0] == self.secondCube[0] and np.abs(self.firstCube[1]-self.secondCube[1])<=1:
+            return True
+        if self.firstCube[1] == self.secondCube[1] and np.abs(self.firstCube[0]-self.secondCube[0])<=1:
+            return True
+        return False
+            
     def __blindSearchMove(self):
         solver = BlindSearch(self,self.board)
         ans = solver.solve()
@@ -221,9 +230,9 @@ class Cube:
                             self.board.map[j]%=4
                         else:
                             self.board.map[j]=2
-                elif ((self.secondCube in buttonListKeys and self.board.buttonList[self.secondCube][0]==3)):
+                elif (self.secondCube in buttonListKeys and self.board.buttonList[self.secondCube][0]==3) and self.isNotSplit():
                     [self.firstCube,self.secondCube] = self.board.buttonList[self.secondCube][1]
-                elif (self.firstCube in buttonListKeys and self.board.buttonList[self.firstCube][0]==3):
+                elif (self.firstCube in buttonListKeys and self.board.buttonList[self.firstCube][0]==3) and self.isNotSplit():
                     [self.firstCube,self.secondCube] = self.board.buttonList[self.firstCube][1]   
                 self.board.screen.fill(pg.Color(self.board.color[0]))
                 self.board.draw()
@@ -311,9 +320,9 @@ class Cube:
                         self.board.map[i]%=4
                     else:
                         self.board.map[i]=2
-            elif ((self.secondCube in buttonListKeys and self.board.buttonList[self.secondCube][0]==3)):
+            elif ((self.secondCube in buttonListKeys and self.board.buttonList[self.secondCube][0]==3) and self.isNotSplit()):
                     [self.firstCube,self.secondCube] = self.board.buttonList[self.secondCube][1]
-            elif (self.firstCube in buttonListKeys and self.board.buttonList[self.firstCube][0]==3):
+            elif (self.firstCube in buttonListKeys and self.board.buttonList[self.firstCube][0]==3 and self.isNotSplit()):
                 [self.firstCube,self.secondCube] = self.board.buttonList[self.firstCube][1]
         return 1
 
