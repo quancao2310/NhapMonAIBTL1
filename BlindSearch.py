@@ -18,9 +18,9 @@ from collections import deque
 # (5,7):[3,[(1,1),(2,2)]]
 # }
 # end test
-# state = (firstCube, secondCube, [newTargetonBoard])
+# state = (firstCube, secondCube, {newTargetOnBoard})
 class Node:
-    def __init__(self, state:tuple, parent=None, action=None, path_cost=0):
+    def __init__(self, state:tuple[tuple, tuple, set[tuple]], parent=None, action=None, path_cost=0):
         self.state = state
         self.parent = parent
         self.action = action
@@ -71,10 +71,13 @@ class Node:
 
 class BlindSearch:
     def __init__(self,cube,board):
-        self.board:dict = board.map.copy() #dict of tuple:int
+        self.board:dict[tuple,int] = board.map.copy() #dict of tuple:int
         self.firstCube:tuple = cube.firstCube #tuple
         self.secondCube:tuple = cube.secondCube #tuple
-        self.button:dict = board.buttonList #dict of tuple:list
+        self.button:dict[tuple, list] = board.buttonList #dict of tuple:list
+        self.initial = (self.firstCube, self.secondCube, set({}))
+        goal_tile = list(self.board.keys())[list(self.board.values()).index(3)]
+        self.goal = (goal_tile, goal_tile)
         ### board is a dictionary with key is a tuple of (row, col)
         ### value is a type of the brick 
         ### 0 for no brick, 1 for weak brick, 2 is normal brick, 3 is a win hole in game
@@ -91,45 +94,45 @@ class BlindSearch:
     #     self.firstCube = fc
     #     self.secondCube = sc
     #     self.button = bt
+    # state = (firstCube, secondCube, {newTargetOnBoard})
+    
+    def goal_test(self, state:tuple[tuple, tuple, set[tuple]]):
+        return state[0:2] == self.goal
+    
+    def __inMap(self, tile:tuple):
+        return tile in self.board and self.board[tile] != 0
 
-    def initial(self) -> tuple:
-        targets = []
-        for btn in self.button:
-            if self.button[btn][0] <= 2:
-                for tar in self.button[btn][1]:
-                    if tar in self.board:
-                        targets.append(tar)
-        return (self.firstCube, self.secondCube, targets)
-    
-    def goal(self) -> tuple:
-        goal_tile = list(self.board.keys())[list(self.board.values()).index(3)]
-        return (goal_tile, goal_tile)
-    
     def actions(self, state:tuple) -> list:
         fc, sc, targets = state # tuple, tuple, list of tuples
         acts = []
-        key_list = list(self.board.keys())
-        if fc == sc: # dung -> nam
-            tmp_list = [[(fc[0]+1, fc[1]), (fc[0]+2, fc[1])], [(fc[0]-2, fc[1]), (fc[0]-1, fc[1])],
-                        [(fc[0], fc[1]+1), (fc[0], fc[1]+2)], [(fc[0], fc[1]-2), (fc[0], fc[1]-1)]] # Down Up Right Left
+        if fc == sc: # Dung -> Nam
+            tmp_list = [
+                        [(fc[0]+1, fc[1]), (fc[0]+2, fc[1])], # Down
+                        [(fc[0], fc[1]+1), (fc[0], fc[1]+2)], # Right
+                        [(fc[0]-2, fc[1]), (fc[0]-1, fc[1])], # Up
+                        [(fc[0], fc[1]-2), (fc[0], fc[1]-1)], # Left
+                        ]
             for item in tmp_list:
                 new_first, new_second = item
-                if new_first in key_list and self.board[new_first] != 0 and new_second in key_list and self.board[new_second] != 0:
+                if self.__inMap(new_first) and self.board[new_first] != 0 and self.__inMap(new_second) and self.board[new_second] != 0:
                     new_targets = deepcopy(targets)
                     for btn in self.button:
                         if self.button[btn][0] == 1 and (btn == new_first or btn == new_second):
                             for tar in self.button[btn][1]:
                                 if tar not in new_targets:
-                                    new_targets.append(tar)
+                                    new_targets.add(tar)
                                 else:
-                                    new_targets.remove(tar)
+                                    new_targets.discard(tar)
                     acts.append((new_first, new_second, new_targets))
-        elif fc[0] + 1 == sc[0] and fc[1] == sc[1]: # nam doc: len xuong -> dung, trai phai -> nam
-            tmp_list = [(sc[0]+1, sc[1]), (fc[0]-1, fc[1])] # Down Up
+        elif fc[0] + 1 == sc[0] and fc[1] == sc[1]: # Nam doc: len xuong -> Dung, trai phai -> Nam doc
+            tmp_list = [
+                        (sc[0]+1, sc[1]), # Down
+                        (fc[0]-1, fc[1]), # Up
+                        ]
             for item in tmp_list:
                 new_first = item
                 new_second = new_first
-                if new_first in key_list and self.board[new_first] > 1:
+                if self.__inMap(new_first) and self.board[new_first] > 1:
                     new_targets = deepcopy(targets)
                     for btn in self.button:
                         if btn == new_first:
@@ -139,29 +142,35 @@ class BlindSearch:
                             else:
                                 for tar in self.button[btn][1]:
                                     if tar not in new_targets:
-                                        new_targets.append(tar)
+                                        new_targets.add(tar)
                                     else:
-                                        new_targets.remove(tar)
+                                        new_targets.discard(tar)
                     acts.append((new_first, new_second, new_targets))
-            tmp_list = [[(fc[0], fc[1]+1), (sc[0], sc[1]+1)], [(fc[0], fc[1]-1), (sc[0], sc[1]-1)]] # Right Left
+            tmp_list = [
+                        [(fc[0], fc[1]+1), (sc[0], sc[1]+1)], # Right
+                        [(fc[0], fc[1]-1), (sc[0], sc[1]-1)], # Left
+                        ]
             for item in tmp_list:
                 new_first, new_second = item
-                if new_first in key_list and self.board[new_first] != 0 and new_second in key_list and self.board[new_second] != 0:
+                if self.__inMap(new_first) and self.board[new_first] != 0 and self.__inMap(new_second) and self.board[new_second] != 0:
                     new_targets = deepcopy(targets)
                     for btn in self.button:
                         if self.button[btn][0] == 1 and (btn == new_first or btn == new_second):
                             for tar in self.button[btn][1]:
                                 if tar not in new_targets:
-                                    new_targets.append(tar)
+                                    new_targets.add(tar)
                                 else:
-                                    new_targets.remove(tar)
+                                    new_targets.discard(tar)
                     acts.append((new_first, new_second, new_targets))
-        elif fc[0] == sc[0] and fc[1] + 1 == sc[1]: # nam ngang: len xuong -> nam, trai phai -> dung
-            tmp_list = [(sc[0], sc[1]+1), (fc[0], fc[1]-1)] # Down Up
+        elif fc[0] == sc[0] and fc[1] + 1 == sc[1]: # Nam ngang: len xuong -> Nam ngang, trai phai -> Dung
+            tmp_list = [
+                        (sc[0], sc[1]+1), # Down
+                        (fc[0], fc[1]-1), # Up
+                        ]
             for item in tmp_list:
                 new_first = item
                 new_second = new_first
-                if new_first in key_list and self.board[new_first] > 1:
+                if self.__inMap(new_first) and self.board[new_first] > 1:
                     new_targets = deepcopy(targets)
                     for btn in self.button:
                         if btn == new_first:
@@ -171,31 +180,40 @@ class BlindSearch:
                             else:
                                 for tar in self.button[btn][1]:
                                     if tar not in new_targets:
-                                        new_targets.append(tar)
+                                        new_targets.add(tar)
                                     else:
-                                        new_targets.remove(tar)
+                                        new_targets.discard(tar)
                     acts.append((new_first, new_second, new_targets))
-            tmp_list = [[(fc[0]+1, fc[1]), (sc[0]+1, sc[1])], [(fc[0]-1, fc[1]), (sc[0]-1, sc[1])]] # Right Left
+            tmp_list = [
+                        [(fc[0]+1, fc[1]), (sc[0]+1, sc[1])], # Right
+                        [(fc[0]-1, fc[1]), (sc[0]-1, sc[1])], # Left
+                        ]
             for item in tmp_list:
                 new_first, new_second = item
-                if new_first in key_list and self.board[new_first] != 0 and new_second in key_list and self.board[new_second] != 0:
+                if self.__inMap(new_first) and self.board[new_first] != 0 and self.__inMap(new_second) and self.board[new_second] != 0:
                     new_targets = deepcopy(targets)
                     for btn in self.button:
                         if self.button[btn][0] == 1 and (btn == new_first or btn == new_second):
                             for tar in self.button[btn][1]:
                                 if tar not in new_targets:
-                                    new_targets.append(tar)
+                                    new_targets.add(tar)
                                 else:
-                                    new_targets.remove(tar)
+                                    new_targets.discard(tar)
                     acts.append((new_first, new_second, new_targets))
-        else: # khoi duoc tach ra lam hai
-            tmp_list = [[(fc[0]+1, fc[1]), (sc[0], sc[1])], [(fc[0]-1, fc[1]), (sc[0], sc[1])], # Down1 Up1
-                        [(fc[0], fc[1]+1), (sc[0], sc[1])], [(fc[0], fc[1]-1), (sc[0], sc[1])], # Right1 Left1
-                        [(fc[0], fc[1]), (sc[0]+1, sc[1])], [(fc[0], fc[1]), (sc[0]-1, sc[1])], # Down2 Up2
-                        [(fc[0], fc[1]), (sc[0], sc[1]+1)], [(fc[0], fc[1]), (sc[0], sc[1]-1)]] # Right2 Left2
+        else: # Khoi duoc tach ra lam hai
+            tmp_list = [
+                        [(fc[0]+1, fc[1]), (sc[0], sc[1])], # Down1
+                        [(fc[0], fc[1]+1), (sc[0], sc[1])], # Right1
+                        [(fc[0]-1, fc[1]), (sc[0], sc[1])], # Up1
+                        [(fc[0], fc[1]-1), (sc[0], sc[1])], # Left1
+                        [(fc[0], fc[1]), (sc[0]+1, sc[1])], # Down2
+                        [(fc[0], fc[1]), (sc[0], sc[1]+1)], # Right2
+                        [(fc[0], fc[1]), (sc[0]-1, sc[1])], # Up2
+                        [(fc[0], fc[1]), (sc[0], sc[1]-1)], # Left2
+                        ]
             for item in tmp_list:
                 new_first, new_second = item
-                if new_first in key_list and self.board[new_first] != 0 and new_second in key_list and self.board[new_second] != 0:
+                if self.__inMap(new_first) and self.board[new_first] != 0 and self.__inMap(new_second) and self.board[new_second] != 0:
                     if new_first > new_second:
                         new_first, new_second = new_second, new_first
                     new_targets = deepcopy(targets)
@@ -203,24 +221,21 @@ class BlindSearch:
                         if self.button[btn][0] == 1 and (btn == new_first or btn == new_second):
                             for tar in self.button[btn][1]:
                                 if tar not in new_targets:
-                                    new_targets.append(tar)
+                                    new_targets.add(tar)
                                 else:
-                                    new_targets.remove(tar)
+                                    new_targets.discard(tar)
                     acts.append((new_first, new_second, new_targets))
         return acts
     
     def result(self, state, action):
         return action
     
-    def goal_test(self, state:tuple):
-        return state[0:2] == self.goal()
-    
-    def path_cost(self, c:int):
+    def path_cost(self, c:int): # g function
         return c + 1
     
     def bfs(self):
-        count = 0
-        node = Node(self.initial())
+        iteration = 0
+        node = Node(self.initial)
         if self.goal_test(node.state):
             return node.path()
         q = deque([node])
@@ -228,22 +243,23 @@ class BlindSearch:
         while q:
             node = q.popleft()
             visited.add(node.key())
-            count += 1
-            if count % 50 == 0:
-                print(count)
+            iteration += 1
             for tar in node.state[2]:
-                if tar not in self.board:
+                if not self.__inMap(tar):
                     self.board[tar] = 2
                 else:
                     self.board.pop(tar, None)
+            child:Node
             for child in node.expand(self):
                 if child.key() not in visited and child not in q:
                     # print(child.key())
                     if self.goal_test(child.state):
+                        print("Solution depth:", child.depth)
+                        print("Number of iterations:", iteration)
                         return child.path()
                     q.append(child)
             for tar in node.state[2]:
-                if tar in self.board:
+                if self.__inMap(tar):
                     self.board.pop(tar, None)
                 else:
                     self.board[tar] = 2
