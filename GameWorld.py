@@ -209,6 +209,8 @@ class Cube:
             for i in seriesMove:
                 self.firstCube, self.secondCube = i
                 buttonListKeys = self.board.buttonList.keys()
+                if (self.firstCube not in self.board.map.keys()) or (self.secondCube not in self.board.map.keys()) or (self.board.map[self.firstCube]==0) or (self.board.map[self.secondCube]==0):
+                    break                   
                 if (self.firstCube in buttonListKeys and self.board.buttonList[self.firstCube][0]==1):
                     for j in self.board.buttonList[self.firstCube][1]:
                         if j in self.board.map.keys():
