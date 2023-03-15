@@ -51,6 +51,7 @@ class Cube:
         self.secondCube = game.testCase[1][1]
         self.board = game.board
         self.color = game.setting.cubeColor
+        self.delayTime = game.setting.delayTime
     def __draw(self,points):
         pg.draw.polygon(self.board.screen,pg.Color(self.color),points)
         for i in range (0,4):
@@ -209,6 +210,10 @@ class Cube:
             for i in seriesMove:
                 self.firstCube, self.secondCube = i
                 buttonListKeys = self.board.buttonList.keys()
+                if (self.firstCube not in self.board.map.keys()) or (self.secondCube not in self.board.map.keys()) or (self.board.map[self.firstCube]==0) or (self.board.map[self.secondCube]==0):
+                    break
+                if (self.firstCube == self.secondCube) and self.board.map[self.firstCube]==1:
+                    break                   
                 if (self.firstCube in buttonListKeys and self.board.buttonList[self.firstCube][0]==1):
                     for j in self.board.buttonList[self.firstCube][1]:
                         if j in self.board.map.keys():
@@ -239,13 +244,17 @@ class Cube:
                 self.board.draw()
                 self.draw()
                 pg.display.update()
-                pg.time.delay(1000)
+                pg.time.delay(self.delayTime)
             if (self.firstCube not in self.board.map.keys()) or (self.secondCube not in self.board.map.keys()) or (self.board.map[self.firstCube]==0) or (self.board.map[self.secondCube]==0):
                 print("You lose")
                 open('Output.txt','a',encoding='utf-8').writelines("You lose\n")
                 return 0
+            elif (self.firstCube == self.secondCube) and self.board.map[self.firstCube]==1:
+                print("You lose")
+                open('Output.txt','a',encoding='utf-8').writelines("You lose\n")
+                return 0
             elif ((self.firstCube == self.secondCube) and (self.board.map[self.secondCube]==3)):
-                print("you win")
+                print("You win")
                 open('Output.txt','a',encoding='utf-8').writelines("You win\n")
                 return 0
             elif (self.firstCube == self.secondCube) and (self.board.map[self.secondCube]==1):
@@ -253,8 +262,8 @@ class Cube:
                 open('Output.txt','a',encoding='utf-8').writelines("You lose\n")
                 return 0
             else:
-                print("can't solve")
-                open('Output.txt','a',encoding='utf-8').writelines("Can't Solve\n")
+                print("Can't solve")
+                open('Output.txt','a',encoding='utf-8').writelines("Can't solve\n")
                 return 0
                     
         else:
