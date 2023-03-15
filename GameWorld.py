@@ -247,7 +247,7 @@ class Cube:
                 open('Output.txt','a',encoding='utf-8').writelines("You lose\n")
                 return 0
             elif ((self.firstCube == self.secondCube) and (self.board.map[self.secondCube]==3)):
-                print("you win")
+                print("You win")
                 open('Output.txt','a',encoding='utf-8').writelines("You win\n")
                 return 0
             elif (self.firstCube == self.secondCube) and (self.board.map[self.secondCube]==1):
@@ -255,8 +255,8 @@ class Cube:
                 open('Output.txt','a',encoding='utf-8').writelines("You lose\n")
                 return 0
             else:
-                print("can't solve")
-                open('Output.txt','a',encoding='utf-8').writelines("Can't Solve\n")
+                print("Can't solve")
+                open('Output.txt','a',encoding='utf-8').writelines("Can't solve\n")
                 return 0
                     
         else:
